@@ -1,7 +1,7 @@
 -------------------------------
 -- Based on "chrono" by Matthias Richter: https://github.com/adnzzzzZ/chrono
 -- MIT License
--- Copyright (c) 2019, 4v0v
+-- Copyright (c) 2018, 4v0v
 -------------------------------
 local Timer = {}
 
@@ -64,11 +64,16 @@ function Timer:update(dt)
                 v.action(); if v.t >= v.total then v.after(); self.timers[tag] = nil end
 
             elseif v.type == "once" then
-                if v.c < v.count then v.action(); v.c = v.c + 1 end
+                if v.bool then v.action(); v.bool = false end
 
             elseif v.type == "always" then
-                if v.c == v.count then v.action(); v.c = 0 end
-                v.c = v.c + 1
+                if v.e == v.each then 
+                    v.action()
+                    v.e = 0
+                    v.c = v.c + 1 
+                    if v.c == v.count then v.after(); self.timers[tag] = nil end
+                end
+                v.e = v.e + 1
 
             elseif v.type == "script" then
                 if coroutine.status(v.coroutine) == "dead" then self.timers[tag] = nil end
@@ -182,12 +187,8 @@ function Timer:tween(time, subject, target, method, a, b)
     }
     return tag
 end
-function Timer:once(action, a, b)
-    local tag, count
-    if     type(a) == "nil"    and type(b) == "nil"    then count, tag = 1, _uid() 
-    elseif type(a) == "string" and type(b) == "nil"    then count, tag = 1, a      
-    elseif type(a) == "number" and type(b) == "nil"    then count, tag = a, _uid() 
-    elseif type(a) == "number" and type(b) == "string" then count, tag = a, b      end
+function Timer:once(action, tag)
+    local tag = tag or _uid()
 
     if self.timers[tag] then return false end 
 
@@ -195,19 +196,22 @@ function Timer:once(action, a, b)
         type   = "once",
         status = "play",
         action = action,
-        count  = count,
-        c = 0,
+        bool = true,
         t = 0
     }
     return tag
 end
 
 function Timer:always(action, a, b)
-    local tag, count
-    if     type(a) == "nil"    and type(b) == "nil"    then count, tag = 1, _uid() 
-    elseif type(a) == "string" and type(b) == "nil"    then count, tag = 1, a      
-    elseif type(a) == "number" and type(b) == "nil"    then count, tag = a, _uid() 
-    elseif type(a) == "number" and type(b) == "string" then count, tag = a, b      end
+    local each, count, after, tag  = 1, -1, function() end
+    if type(a) == "string" and type(b) == "nil"    then tag = a      end 
+    if type(a) == "nil"    and type(b) == "nil"    then tag = _uid() end 
+    if type(a) == "table"  and type(b) == "string" then tag = b      end  
+    if type(a) == "table" then 
+        if a.each  then each  = a.each  end 
+        if a.after then after = a.after end 
+        if a.count then count = a.count end 
+    end
 
     if self.timers[tag] then return false end 
 
@@ -215,12 +219,15 @@ function Timer:always(action, a, b)
         type   = "always",
         status = "play",
         action = action,
+        each   = each, 
         count  = count,
-        c      = count,
+        after  = after,
+        e      = each ,
+        c      = 0,
         t      = 0
     }
-
 end
+
 function Timer:script(action, tag)
     tag = tag or _uid()
     if self.timers[tag] then return false end
