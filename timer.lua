@@ -50,7 +50,7 @@ local function _rand(time)
 end
 local function _uid()
     local func = function() local r = math.random(16) return ("0123456789ABCDEF"):sub(r, r) end 
-    return ("xxxxxxxx"):gsub("[x]", func)
+    return ("xxxxxxxxxxxxxxxx"):gsub("[x]", func)
 end
 --###########################--
 function Timer:update(dt)
