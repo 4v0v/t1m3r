@@ -1,7 +1,7 @@
 -------------------------------
 -- Based on "chrono" by Matthias Richter: https://github.com/adnzzzzZ/chrono
 -- MIT License
--- Copyright (c) 2018, 4v0v
+-- Copyright (c) 2019, 4v0v
 -------------------------------
 local Timer = {}
 
@@ -59,14 +59,20 @@ function Timer:update(dt)
             v.t = v.t + dt
             if     v.type == "after" then 
                 if v.t >= v.total then v.action(); v.after(); self.timers[tag] = nil end
+
             elseif v.type == "during" then
                 v.action(); if v.t >= v.total then v.after(); self.timers[tag] = nil end
+
             elseif v.type == "once" then
                 if v.c < v.count then v.action(); v.c = v.c + 1 end
+
             elseif v.type == "always" then
-                v.action()
+                if v.c == v.count then v.action(); v.c = 0 end
+                v.c = v.c + 1
+
             elseif v.type == "script" then
                 if coroutine.status(v.coroutine) == "dead" then self.timers[tag] = nil end
+
             elseif v.type == "every" then  
                 if v.c == 0 or v.t >= v.total then
 					if v.c == 0 then v.t = v.total end -- first loop 
@@ -76,6 +82,7 @@ function Timer:update(dt)
                     v.total = _rand(v.any_total)
                     if v.c == v.count then v.after(); self.timers[tag] = nil end
                 end
+
             elseif v.type == "tween" then
                 local s  = _tween(v.method, math.min(1, v.t/v.total))
                 local ds = s - v.last_s
@@ -146,7 +153,7 @@ function Timer:during(time, action, a, b)
     self.timers[tag] = {
         type    = "during", 
         status  = "play",
-        t = 0, 
+        t       = 0, 
         total   = _rand(time), 
         action  = action, 
         after   = after
@@ -177,10 +184,10 @@ function Timer:tween(time, subject, target, method, a, b)
 end
 function Timer:once(action, a, b)
     local tag, count
-    if     type(a) == "nil"      and type(b) == "nil"    then count, tag = 1, _uid() 
-    elseif type(a) == "string"   and type(b) == "nil"    then count, tag = 1, a      
-    elseif type(a) == "number"   and type(b) == "nil"    then count, tag = a, _uid() 
-    elseif type(a) == "function" and type(b) == "string" then count, tag = a, b      end
+    if     type(a) == "nil"    and type(b) == "nil"    then count, tag = 1, _uid() 
+    elseif type(a) == "string" and type(b) == "nil"    then count, tag = 1, a      
+    elseif type(a) == "number" and type(b) == "nil"    then count, tag = a, _uid() 
+    elseif type(a) == "number" and type(b) == "string" then count, tag = a, b      end
 
     if self.timers[tag] then return false end 
 
@@ -188,22 +195,29 @@ function Timer:once(action, a, b)
         type   = "once",
         status = "play",
         action = action,
-        count = count,
+        count  = count,
         c = 0,
         t = 0
     }
     return tag
 end
 
-function Timer:always(action, tag)
-    assert(tag ~= nil, "Timer:always() need a tag")
+function Timer:always(action, a, b)
+    local tag, count
+    if     type(a) == "nil"    and type(b) == "nil"    then count, tag = 1, _uid() 
+    elseif type(a) == "string" and type(b) == "nil"    then count, tag = 1, a      
+    elseif type(a) == "number" and type(b) == "nil"    then count, tag = a, _uid() 
+    elseif type(a) == "number" and type(b) == "string" then count, tag = a, b      end
+
     if self.timers[tag] then return false end 
 
     self.timers[tag] = {
         type   = "always",
         status = "play",
         action = action,
-        t = 0
+        count  = count,
+        c      = count,
+        t      = 0
     }
 
 end
@@ -217,12 +231,13 @@ function Timer:script(action, tag)
         coroutine  = coroutine.create(action),
         resume     = function()
             self.timers[tag].script_state = "running"
-            local _no_error, _message = coroutine.resume(self.timers[tag].coroutine) assert(_no_error, _message) 
+            local _no_error, _message = coroutine.resume(self.timers[tag].coroutine)
+            assert(_no_error, _message) 
         end,
-        after_tag  = "",
+        after_tag    = "",
         script_state = "",
-        resume_tag = "",
-        t          = 0
+        resume_tag   = "",
+        t            = 0
     }
     local _no_error, _message = coroutine.resume(self.timers[tag].coroutine, 
         function(time, after_tag)
