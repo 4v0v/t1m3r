@@ -9,7 +9,7 @@ Like those two libraries it also handle tweening values.
 
 This library have functions that can be separated in 2 types:
 - **Timing functions**: Do an action after/during/every amount of time
-- **Looped functions**: Do an action once, every XX update loop
+- **Update functions**: Do an action once, every XX update loop
 
 
 
