@@ -63,12 +63,12 @@ By default, the action function is called every frame.
   - **parameters** = table
   - **tag**   = string
 
-Like a during function without a time restriction
+Shortcut for a **Timer:during** without a time restriction.
 
 
 - **Timer:once(action[, tag])**:
   - **action** = function 
   - **tag**    = string
   
- Do an action once until the once timer is removed
+ Do an action once until the once timer is removed.
 
