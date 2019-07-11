@@ -68,15 +68,6 @@ function Timer:update(dt)
             elseif v.type == "once" then
                 if v.bool then v.action(); v.bool = false end
 
-            elseif v.type == "always" then
-                if v.e == v.each then 
-                    v.action()
-                    v.e = 0
-                    v.c = v.c + 1 
-                    if v.c == v.count then v.after(); self.timers[tag] = nil end
-                end
-                v.e = v.e + 1
-
             elseif v.type == "script" then
                 if coroutine.status(v.coroutine) == "dead" then self.timers[tag] = nil end
 
@@ -213,30 +204,8 @@ function Timer:once(action, tag)
     return tag
 end
 
-function Timer:always(action, a, b)
-    local each, count, after, tag  = 1, -1, function() end
-    if type(a) == "string" and type(b) == "nil"    then tag = a      end 
-    if type(a) == "nil"    and type(b) == "nil"    then tag = _uid() end 
-    if type(a) == "table"  and type(b) == "string" then tag = b      end  
-    if type(a) == "table" then 
-        if a.each  then each  = a.each  end 
-        if a.after then after = a.after end 
-        if a.count then count = a.count end 
-    end
-
-    if self.timers[tag] then return false end 
-
-    self.timers[tag] = {
-        type   = "always",
-        status = "play",
-        action = action,
-        each   = each, 
-        count  = count,
-        after  = after,
-        e      = each ,
-        c      = 0,
-        t      = 0
-    }
+function Timer:always(action, a, b) 
+	self:during(math.huge, action, a, b, c) 
 end
 
 function Timer:script(action, tag)
