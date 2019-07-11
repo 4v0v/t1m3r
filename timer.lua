@@ -61,7 +61,9 @@ function Timer:update(dt)
                 if v.t >= v.total then v.action(); v.after(); self.timers[tag] = nil end
 
             elseif v.type == "during" then
-                v.action(); if v.t >= v.total then v.after(); self.timers[tag] = nil end
+		if v.e == v.each then v.action(); v.e = 0 end
+		v.e = v.e + 1
+		if v.t >= v.total then v.after(); self.timers[tag] = nil end
 
             elseif v.type == "once" then
                 if v.bool then v.action(); v.bool = false end
@@ -147,18 +149,27 @@ function Timer:every(time, action, a, b, c)
     }
     return tag
 end
-function Timer:during(time, action, a, b)
-    local tag, after
-    if     type(a) == "nil"      and type(b) == "nil"    then after, tag = function() end, _uid() 
-    elseif type(a) == "string"   and type(b) == "nil"    then after, tag = function() end, a      
-    elseif type(a) == "function" and type(b) == "nil"    then after, tag = a      , _uid() 
-    elseif type(a) == "function" and type(b) == "string" then after, tag = a      , b      end
+function Timer:during(time, action, a, b, c)
+    local tag, after, each
+    if     type(a) == "nil"      and type(b) == "nil"      and type(c) == "nil"    then after, each, tag = function() end, -1, _uid()
+    elseif type(a) == "string"   and type(b) == "nil"      and type(c) == "nil"    then after, each, tag = function() end, -1, a     
+    elseif type(a) == "number"   and type(b) == "nil"      and type(c) == "nil"    then after, each, tag = function() end,  a, _uid()     
+    elseif type(a) == "function" and type(b) == "nil"      and type(c) == "nil"    then after, each, tag = a      , -1, _uid()     
+    elseif type(a) == "number"   and type(b) == "string"   and type(c) == "nil"    then after, each, tag = function() end,  a, b     
+    elseif type(a) == "function" and type(b) == "string"   and type(c) == "nil"    then after, each, tag = a      , -1, b     
+    elseif type(a) == "function" and type(b) == "number"   and type(c) == "nil"    then after, each, tag = a      ,  b, _uid()
+    elseif type(a) == "number"   and type(b) == "function" and type(c) == "nil"    then after, each, tag = b      ,  a, _uid()
+    elseif type(a) == "function" and type(b) == "number"   and type(c) == "string" then after, each, tag = a      ,  b, c     
+    elseif type(a) == "number"   and type(b) == "function" and type(c) == "string" then after, each, tag = b      ,  a, c      end
+	
     if self.timers[tag] then return false end
 
     self.timers[tag] = {
         type    = "during", 
         status  = "play",
-        t       = 0, 
+        t       = 0,
+	each    = each,
+	e       = each, 
         total   = _rand(time), 
         action  = action, 
         after   = after
