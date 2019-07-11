@@ -204,8 +204,8 @@ function Timer:once(action, tag)
     return tag
 end
 
-function Timer:always(action, a, b, c) 
-	self:during(math.huge, action, a, b, c) 
+function Timer:always(action, a, b) 
+	self:during(math.huge, action, function() end, a, b) 
 end
 
 function Timer:script(action, tag)
