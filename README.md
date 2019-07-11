@@ -56,3 +56,12 @@ By default, the action function is called every frame.
   
  In an amount of time, tween all the values of the table **subject** to the **target** values.
  At the end of the tween the values wil be **exactly** equal to the target values.
+ 
+ -  **Timer:script(function(wait) end):**
+ 
+ Easy way to chain and schedule actions using coroutines. 
+ When you call the wait function with a delay it stop the function this amount of time then continue to execute.
+ When you call the wait function without parameter, it stop the function until you call **Timer:resume_script(tag)**.
+ When you call the wait function with a string, it stop the function until you call **Timer:resume_script(tag)** and you can use the **Timer:get_resume_tag(tag)** function to return the string of the current **wait** function.
+ 
+ 
