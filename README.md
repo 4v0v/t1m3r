@@ -7,12 +7,6 @@ I use it to deal with boolean farms when coding complex behaviors for my games.
 It's build around [chrono.lua](https://github.com/adnzzzzZ/chrono) and [hump.timer](https://github.com/vrld/hump/blob/master/timer.lua).
 Like those two libraries it also handle tweening values.
 
-This library have functions that can be separated in 2 types:
-- **Timing functions**: Do an action after/during/every amount of time
-- **Update loop functions**: Do an action once, every XX update loop
-
-
-
 ## API
 - **Timer:update(dt)**: Put this in the love.update function.
 
