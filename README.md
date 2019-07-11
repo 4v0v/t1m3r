@@ -17,9 +17,27 @@ This library have functions that can be separated in 2 types:
 - **Timer:update(dt)**: Put this in the love.update function.
 
 - **Timer:after(time, action[, after, tag])**:
-  - time   = number
-  - action = function 
-  - after  = function 
-  - tag    = string
+  - **time**   = number
+  - **action** = function 
+  - **after**  = function 
+  - **tag**    = string
 
 After an amount of time (in seconds), execute the action function and then the after function.
+
+- **Timer:every(time, action[, count, after, tag])**:
+  - **time** = number
+  - **action** = function 
+  - **count** = number
+  - **after** = function 
+  - **tag**  = string
+
+Every amount of time, execute the action function.
+If there is a count parameter, the every function will execute this number of time then stop then call the after function.
+If the action function return false, the every function will stop then call the after function.
+
+- **Timer:during(time, action[,after, tag])**:
+  - **time** = number
+  - **action** = function 
+  - **after**  = function 
+  - **tag**    = string
+
