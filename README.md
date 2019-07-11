@@ -17,7 +17,7 @@ This library have functions that can be separated in 2 types:
 - **Timer:update(dt)**: Put this in the love.update function.
 
 - **Timer:after(time, action[, after, tag])**:
-  - <span style="font-size:smaller;">**time**   = number</span>
+  - <span style="font-size:10px;">**time**   = number</span>
   - **action** = function 
   - **after**  = function 
   - **tag**    = string
