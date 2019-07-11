@@ -2,7 +2,7 @@
 
 ## What is it ?
 **timer** is a Löve framework library that handle doing action under certain conditions.
-I was tired to deal with boolean farms when trying to code complex behaviors for my games.
+I use it to deal with boolean farms when coding complex behaviors for my games.
 
 It's build around [chrono.lua](https://github.com/adnzzzzZ/chrono) and [hump.timer](https://github.com/vrld/hump/blob/master/timer.lua).
 Like those two libraries it also handle tweening values.
@@ -15,6 +15,8 @@ This library have functions that can be separated in 2 types:
 
 ## API
 - **Timer:update(dt)**: Put this in the love.update function.
+
+Update the internal of one timer, put this in your **love.update** function.
 
 - **Timer:after(time, action[, after, tag])**:
   - **time**   = number
