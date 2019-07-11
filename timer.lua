@@ -61,9 +61,9 @@ function Timer:update(dt)
                 if v.t >= v.total then v.action(); v.after(); self.timers[tag] = nil end
 
             elseif v.type == "during" then
-		if v.e == v.each then v.action(); v.e = 0 end
-		v.e = v.e + 1
-		if v.t >= v.total then v.after(); self.timers[tag] = nil end
+				if v.e == v.each then v.action(); v.e = 0 end
+				v.e = v.e + 1
+				if v.t >= v.total then v.after(); self.timers[tag] = nil end
 
             elseif v.type == "once" then
                 if v.bool then v.action(); v.bool = false end
@@ -73,7 +73,7 @@ function Timer:update(dt)
 
             elseif v.type == "every" then  
                 if v.c == 0 or v.t >= v.total then
-					if v.c == 0 then v.t = v.total end -- first loop 
+		    	if v.c == 0 then v.t = v.total end -- first loop 
                     v.action()
                     v.c = v.c + 1
                     v.t = v.t - v.total
@@ -159,8 +159,8 @@ function Timer:during(time, action, a, b, c)
         type    = "during", 
         status  = "play",
         t       = 0,
-	each    = each,
-	e       = each, 
+		each    = each,
+		e       = each, 
         total   = _rand(time), 
         action  = action, 
         after   = after
