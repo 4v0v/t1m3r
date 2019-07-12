@@ -1,7 +1,7 @@
 -------------------------------
 -- Based on "chrono" by Matthias Richter: https://github.com/adnzzzzZ/chrono
 -- MIT License
--- Copyright (c) 2018, 4v0v
+-- Copyright (c) 2019, 4v0v
 -------------------------------
 local Timer = {}
 
