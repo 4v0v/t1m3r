@@ -32,8 +32,8 @@ end
 local function _calc_tween(subject, target, out)
     for k, v in pairs(target) do
         local ref = subject[k]
-        if type(v) == 'table' then
-             _calc_tween(ref, v, out)
+        if type(v) == 'table' then 
+	    _calc_tween(ref, v, out)
         else 
             local ok, delta = pcall(function() return (v-ref)*1 end)
             out[#out+1] = {subject, k, delta} 
@@ -61,19 +61,16 @@ function Timer:update(dt)
                 if v.t >= v.total then v.action(); v.after(); self.timers[tag] = nil end
 
             elseif v.type == "during" then
-				if v.e == v.each then v.action(); v.e = 0 end
-				v.e = v.e + 1
-				if v.t >= v.total then v.after(); self.timers[tag] = nil end
-
-            elseif v.type == "once" then
-                if v.bool then v.action(); v.bool = false end
+		if v.e == v.each then v.action(); v.e = 0 end
+		v.e = v.e + 1
+		if v.t >= v.total then v.after(); self.timers[tag] = nil end
 
             elseif v.type == "script" then
                 if coroutine.status(v.coroutine) == "dead" then self.timers[tag] = nil end
 
             elseif v.type == "every" then  
                 if v.c == 0 or v.t >= v.total then
-		    	if v.c == 0 then v.t = v.total end -- first loop 
+		    if v.c == 0 then v.t = v.total end -- first loop 
                     v.action()
                     v.c = v.c + 1
                     v.t = v.t - v.total
@@ -125,8 +122,8 @@ function Timer:every(time, action, a, b, c)
     elseif type(a) == "number"   and type(b) == "function" and type(c) == "nil"    then after, count, tag = b      ,  a, _uid()
     elseif type(a) == "function" and type(b) == "number"   and type(c) == "string" then after, count, tag = a      ,  b, c     
     elseif type(a) == "number"   and type(b) == "function" and type(c) == "string" then after, count, tag = b      ,  a, c      end
-
     if self.timers[tag] then return false end
+	
     self.timers[tag] = {
         type      = "every", 
         status    = "play",
@@ -152,15 +149,14 @@ function Timer:during(time, action, a, b, c)
     elseif type(a) == "number"   and type(b) == "function" and type(c) == "nil"    then after, each, tag = b      ,  a, _uid()
     elseif type(a) == "function" and type(b) == "number"   and type(c) == "string" then after, each, tag = a      ,  b, c     
     elseif type(a) == "number"   and type(b) == "function" and type(c) == "string" then after, each, tag = b      ,  a, c      end
-	
     if self.timers[tag] then return false end
-
+	
     self.timers[tag] = {
         type    = "during", 
         status  = "play",
         t       = 0,
-		each    = each,
-		e       = each, 
+	each    = each,
+	e       = each, 
         total   = _rand(time), 
         action  = action, 
         after   = after
@@ -190,22 +186,11 @@ function Timer:tween(time, subject, target, method, a, b)
     return tag
 end
 function Timer:once(action, tag)
-    local tag = tag or _uid()
-
-    if self.timers[tag] then return false end 
-
-    self.timers[tag] = {
-        type   = "once",
-        status = "play",
-        action = action,
-        bool = true,
-        t = 0
-    }
-    return tag
+    return self:every(math.huge, action, tag)
 end
 
 function Timer:always(action, a, b) 
-	self:during(math.huge, action, function() end, a, b) 
+    return self:during(math.huge, action, a, b) 
 end
 
 function Timer:script(action, tag)
@@ -249,7 +234,6 @@ function Timer:script(action, tag)
 end
 --###########################--
 function Timer:is_timer(tag)  return not not self.timers[tag]    end
-function Timer:get_type(tag)  return self.timers[tag].type end
 function Timer:get_time(tag)  return self.timers[tag].t, self.timers[tag].total end
 function Timer:get_count(tag) return self.timers[tag].c, self.timers[tag].count end
 function Timer:resume_script(tag) if self.timers[tag].script_state == "wait" then  self.timers[tag].resume() end end
