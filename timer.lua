@@ -200,34 +200,37 @@ function Timer:script(action, tag)
     self.timers[tag] = {
         type       = "script",
         status     = "play",
+        t          = 0,
+        after_tag  = "",
         coroutine  = coroutine.create(action),
         resume     = function()
-            local _no_error, _message = coroutine.resume(self.timers[tag].coroutine)
-            assert(_no_error, _message) 
-        end,
-        after_tag    = "",
-        t            = 0
+                        local _error, _message = coroutine.resume(self.timers[tag].coroutine)
+                        assert(_no_error, _message) 
+                    end
     }
-    local _no_error, _message = coroutine.resume(self.timers[tag].coroutine, 
+
+    local _error, _message = coroutine.resume(self.timers[tag].coroutine, 
         function(time, after_tag)
             if type(time) == "number" then 
                 self.timers[tag].after_tag = self:after(time, function()
-                    local _no_error, _message = coroutine.resume(self.timers[tag].coroutine) 
-                    assert(_no_error, _message) 
+                    local _error, _message = coroutine.resume(self.timers[tag].coroutine) 
+                    assert(_error, _message) 
                 end, after_tag)
                 coroutine.yield()
 
-            elseif time == nil then coroutine.yield() end
+            elseif not time then 
+                coroutine.yield() 
+            end
         end
     )
-    assert(_no_error, _message)
+    assert(_error, _message)
     return tag, self.timers[tag].resume
 end
 --###########################--
 function Timer:is_timer(tag)  return not not self.timers[tag]    end
 function Timer:get_time(tag)  return self.timers[tag].t, self.timers[tag].total end
 function Timer:get_count(tag) return self.timers[tag].c, self.timers[tag].count end
-function Timer:resume_script(tag) if self.timers[tag].script_state == "wait" then  self.timers[tag].resume() end end
+function Timer:resume_script(tag) self.timers[tag].resume() end
 function Timer:pause(tag)
     if self.timers[tag].type == "script" then if self.timers[self.timers[tag].after_tag] then self.timers[self.timers[tag].after_tag].status = "pause" end end
     self.timers[tag].status = "pause" 
