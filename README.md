@@ -26,6 +26,7 @@ _Create a new timer instance._
 ```lua
 timer:update(dt)
 ```
+  -`dt(number)`: _delta time._
 
 _Update the timer, put this in your `love.update(dt)` function._
 
@@ -98,7 +99,7 @@ Timer:always(action[, each, tag])
   - `each(number)`
   - `tag(string)`
 
-_Do an action every frame. Shortcut of **Timer:during** without a time restriction._
+_Do an action every frame. Shortcut of **timer:during(math.huge, ...)**_
 
 ---
 ```lua
@@ -107,8 +108,9 @@ Timer:once(action[, tag])
   - `action(function)`
   - `tag(string)`
   
-_Do an action once until the once timer is removed._
+_Do an action once, can't do it again until the **once timer** is removed._
 
+---
 ```lua
 Timer:is_timer(tag)
 Timer:get_time(tag)
