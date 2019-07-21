@@ -27,7 +27,7 @@ _Create a new timer instance._
 timer:update(dt)
 ```
 
-_Update the internal of one timer, put this in your **love.update** function._
+_Update the timer, put this in your `love.update(dt)` function._
 
 ---
 ```lua
