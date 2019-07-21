@@ -69,7 +69,7 @@ By default, the action function is called every frame._
 
 ---
 ```lua
-timer:tween(time, subject, target, method[,after, tag])**
+timer:tween(time, subject, target, method[,after, tag])
 ```
   - `time(number)`
   - `subject(table)`
