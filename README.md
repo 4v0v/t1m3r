@@ -108,3 +108,14 @@ Timer:once(action[, tag])
   - `tag(string)`
   
 _Do an action once until the once timer is removed._
+
+```lua
+Timer:is_timer(tag)
+Timer:get_time(tag)
+Timer:get_count(tag)
+Timer:resume_script(tag)
+Timer:pause(tag)
+Timer:play(tag)
+Timer:remove(tag)
+Timer:destroy()
+```
