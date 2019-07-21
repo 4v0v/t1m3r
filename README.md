@@ -26,7 +26,7 @@ _Create a new timer instance._
 ```lua
 timer:update(dt)
 ```
-  -`dt(number)`: _delta time._
+  - `dt(number)`: _delta time._
 
 _Update the timer, put this in your `love.update(dt)` function._
 
@@ -45,11 +45,11 @@ _After an amount of time (in seconds), execute the action function and then the 
 ```lua
 timer:every(time, action[, count, after, tag])
 ```
-  - `time(number)`
-  - `action(function)`
-  - `count(number)`
-  - `after(function)`
-  - `tag(string)`
+  - `time(number or table)`: amount of time in second, if table like `{x, y}` time is a random value between `x` and `y` seconds. 
+  - `action(function)`: function called after time
+  - `count(number)`: number of executions
+  - `after(function)`: function called after the number of executions or if action return false
+  - `tag(string)`: name of this **every timer**
 
 _Every amount of time, execute the action function.
 If there is a count parameter, the every function will execute this number of time then stop then call the after function.
