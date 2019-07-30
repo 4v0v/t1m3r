@@ -9,6 +9,9 @@ Like those two libraries it also handle tweening values.
 
 All timer functions contains a **tag** parameter. It act like a primary key of the Timer object so it's unique to it. If you try to call a timer function with an already existing **tag**, the function will return false. If you delete the timer function, the tag is available again. If you don't put a tag parameter, it will be automaticaly generated.
 
+The **time** parameter for every function can either be a number of a table with the format `{x, y}`, it generate a random time between `x` and `y` seconds.
+In an **every timer**, the **time** will be randomized after every execution of the action.
+
 ## API
 ---
 ```lua
@@ -36,7 +39,7 @@ _Update the timer, put this in your `love.update(dt)` function._
 ```lua
 timer:after(time, action[, after, tag])
 ```
-  - `time(number)`
+  - `time(number or table)`
   - `action(function)`
   - `after(function)`
   - `tag(string)`
@@ -49,7 +52,7 @@ _After an amount of time (in seconds), execute the action function and then the 
 ```lua
 timer:every(time, action[, count, after, tag])
 ```
-  - `time(number or table)`: amount of time in second, if table like `{x, y}` time is a random value between `x` and `y` seconds. 
+  - `time(number or table)` 
   - `action(function)`: function called after time
   - `count(number)`: number of executions
   - `after(function)`: function called after the number of executions or if action return false
