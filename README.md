@@ -7,6 +7,8 @@ I use it to deal with boolean farms when coding complex behaviors for my games.
 It's build around [chrono.lua](https://github.com/adnzzzzZ/chrono) and [hump.timer](https://github.com/vrld/hump/blob/master/timer.lua).
 Like those two libraries it also handle tweening values.
 
+All timer functions contains a **tag** parameter. It act like a primary key of the Timer object so it's unique to it. If you try to call a timer function with an already existing **tag**, the function will return false. If you delete the timer function, the tag is available again. If you don't put a tag parameter, it will be automaticaly generated.
+
 ## API
 ---
 ```lua
@@ -38,6 +40,8 @@ timer:after(time, action[, after, tag])
   - `action(function)`
   - `after(function)`
   - `tag(string)`
+  
+ **return :** `tag(string)` or`false`
 
 _After an amount of time (in seconds), execute the action function and then the after function._
 
@@ -50,8 +54,10 @@ timer:every(time, action[, count, after, tag])
   - `count(number)`: number of executions
   - `after(function)`: function called after the number of executions or if action return false
   - `tag(string)`: name of this **every timer**
+  
+**return :** `tag(string)` or `false`
 
-_Every amount of time, execute the action function.
+_Execute the action the moment this every function is called then every amount of time, execute the action function again.
 If there is a count parameter, the every function will execute this number of time then stop then call the after function.
 If the action function return false, the every function will stop then call the after function._
 
@@ -64,6 +70,8 @@ timer:during(time, action[, each, after, tag])
   - `each(number)`
   - `after(function)`
   - `tag(string)`
+  
+**return :** `tag(string)` or `false`
 
 _During an amount of time, execute the action function every **each** number of update loop then execute the after function. 
 By default, the action function is called every frame._
@@ -77,19 +85,22 @@ timer:tween(time, subject, target, method[,after, tag])
   - `target(table)`
   - `after(function)`
   - `tag(string)`
+   
+**return :** `tag(string)` or `false`
   
 _In an amount of time, tween all the values of the table **subject** to the **target** values.
 At the end of the tween the values wil be **exactly** equal to the target values._
  
 ---
 ```lua
-timer:script(function(wait) end)
+timer:script(function(wait) end, tag)
 ```
+
+ **return :** `tag(string)`, `resume(function)` or `false`
  
 _Easy way to chain and schedule actions using coroutines. 
-When you call the wait function with a delay it stop the function this amount of time then continue to execute.
-When you call the wait function without parameter, it stop the function until you call **Timer:resume_script()**.
-the **Timer:get_resume_tag(tag)** function to return the string of the current **wait** function._
+- If you call the **wait function** with a delay it stop the function this amount of time then continue to execute.
+- If you call the **wait function** without parameter, it stop the function until you call **Timer:resume_script()** or the **resume** function returned.
  
  ---
 ```lua
@@ -98,8 +109,10 @@ Timer:always(action[, each, tag])
   - `action(function)`
   - `each(number)`
   - `tag(string)`
+  
+**return :** `tag(string)` or `false`
 
-_Do an action every frame. Shortcut of **timer:during(math.huge, ...)**_
+_Do an action every frame. Shortcut of **timer:during(math.huge, ...)**._
 
 ---
 ```lua
@@ -107,8 +120,10 @@ Timer:once(action[, tag])
 ```
   - `action(function)`
   - `tag(string)`
-  
-_Do an action once, can't do it again until the **once timer** is removed._
+
+**return :** `tag(string)` or `false`
+
+_Do an action once, can't do it again until the **once timer** is removed. Shortcut of **timer:every(math.huge, ...)**._
 
 ---
 ```lua
