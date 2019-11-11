@@ -205,7 +205,7 @@ function Timer:script(action, tag)
         coroutine  = coroutine.create(action),
         resume     = function()
                         local _error, _message = coroutine.resume(self.timers[tag].coroutine)
-                        assert(_no_error, _message) 
+                        assert(_error, _message) 
                     end
     }
 
