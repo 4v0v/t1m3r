@@ -1,4 +1,4 @@
-# timer
+# t1m3r
 
 ## What is it ?
 **timer** is a Löve framework library that handle doing action under certain conditions.
