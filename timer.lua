@@ -16,7 +16,13 @@ local _t = {
 	elastic = function(x, a, p) a, p = a and math.max(1, a) or 1, p or 0.3; return (-a*math.sin(2*math.pi/p*(x-1) - math.asin(1/a)))*2^(10*(x-1)) end -- amp, period
 }
 
-local function _rand(t) if type(t) == 'table' then return love.math.random()*(t[1] - t[2]) + t[2] else return t end end
+local function _rand(t) 
+	if type(t) == 'table' then 
+		return love.math.random() * (t[1] - t[2]) + t[2] 
+	else 
+		return t 
+	end 
+end
 
 local function _tween(f, ...)
 	if     f:find('linear')    then return _t.linear(...)
@@ -41,16 +47,21 @@ end
 
 function Timer:update(dt)
   for tag, v in pairs(self.timers) do
-		if v.status ~= 'play' then break end
+		if v.status ~= 'play' then goto continue end
 		v.t = v.t + dt
 
 		if v.type == 'after' then 
-			if v.t >= v.total then v.action(); self.timers[tag] = nil end
+			if v.t >= v.total then 
+				v.action()
+				self:remove(tag)
+			end
 
 		elseif v.type == 'during' then
-			if v.e == v.each then v.action(); v.e = 0 end
-			v.e = v.e + 1
-			if v.t >= v.total then v.after(); self.timers[tag] = nil end
+			v.action()
+			if v.t >= v.total then 
+				v.after()
+				self:remove(tag) 
+			end
 
 		elseif v.type == 'every' then  
 			if v.c == 0 or v.t >= v.total then
@@ -59,19 +70,30 @@ function Timer:update(dt)
 				v.c = v.c + 1
 				v.t = v.t - v.total
 				v.total = _rand(v.any_total)
-				if v.c == v.count then v.after(); self.timers[tag] = nil end
+				if v.c == v.count then 
+					v.after()
+					self:remove(tag)
+				end
 			end
 
 		elseif v.type == 'tween' then
 			local s  = _tween(v.method, math.min(1, v.t/v.total))
 			local ds = s - v.last_s
 			v.last_s = s
-			for _, info in ipairs(v.payload) do local ref, key, delta = unpack(info); ref[key] = ref[key] + delta*ds end
+			for _, info in ipairs(v.payload) do 
+				local ref, key, delta = unpack(info)
+				ref[key] = ref[key] + delta * ds 
+			end
 			if v.t >= v.total then 
-				for _, info in ipairs(v.payload) do local ref, key, _ = unpack(info); ref[key] = v.target[key] end
-				v.after(); self.timers[tag] = nil 
+				for _, info in ipairs(v.payload) do 
+					local ref, key, _ = unpack(info)
+					ref[key] = v.target[key] 
+				end
+				v.after()
+				self:remove(tag)
 			end
 		end
+		::continue::
 	end
 end
 
@@ -105,15 +127,13 @@ function Timer:every(time, action, count, tag, after)
 	return tag
 end
 
-function Timer:during(time, action, each, tag, after)
+function Timer:during(time, action, tag, after)
 	local tag = tag or uid()
   if self.timers[tag] then return false end
 	self.timers[tag] = {
 		type    = 'during', 
 		status  = 'play',
 		t       = 0,
-		each    = each or 1,
-		e       = each or 1, 
 		total   = _rand(time), 
 		action  = action, 
 		after   = after or function() end,
@@ -140,11 +160,11 @@ function Timer:tween(time, subject, target, method, tag, after)
 end
 
 function Timer:once(action, tag) 
-	return self:every(math.huge, action, tag) 
+	return self:every(math.huge, action, _, tag) 
 end
 
-function Timer:always(action, each, tag)
-	return self:during(math.huge, action, each, tag) 
+function Timer:always(action, tag)
+	return self:during(math.huge, action, tag) 
 end
 
 function Timer:get(tag) 
@@ -168,3 +188,4 @@ function Timer:destroy()
 end
 
 return setmetatable({}, {__call = Timer.new})
+
