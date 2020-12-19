@@ -16,12 +16,9 @@ local _t = {
 	elastic = function(x, a, p) a, p = a and math.max(1, a) or 1, p or 0.3; return (-a*math.sin(2*math.pi/p*(x-1) - math.asin(1/a)))*2^(10*(x-1)) end -- amp, period
 }
 
-local function _rand(t) 
-	if type(t) == 'table' then 
-		return love.math.random() * (t[1] - t[2]) + t[2] 
-	else 
-		return t 
-	end 
+local function _random_time(time) 
+	if type(time) == 'table' then return time[1] + love.math.random() * (time[2] - time[1]) 
+	else return time end 
 end
 
 local function _tween(f, ...)
@@ -64,12 +61,11 @@ function Timer:update(dt)
 			end
 
 		elseif v.type == 'every' then  
-			if v.c == 0 or v.t >= v.total then
-				if v.c == 0 then v.t = v.total end -- first loop 
+			if v.t >= v.total then
 				v.action()
 				v.c = v.c + 1
 				v.t = v.t - v.total
-				v.total = _rand(v.any_total)
+				v.total = _random_time(v.initial_time)
 				if v.c == v.count then 
 					v.after()
 					self:remove(tag)
@@ -93,6 +89,7 @@ function Timer:update(dt)
 				self:remove(tag)
 			end
 		end
+		
 		::continue::
 	end
 end
@@ -104,10 +101,28 @@ function Timer:after(time, action, tag)
 		type   = 'after', 
 		status = 'play',
 		t      = 0, 
-		total  = _rand(time), 
+		total  = _random_time(time), 
 		action = action,
 	}
-	return tag
+	return self.timers[tag]
+end
+
+function Timer:every_immediate(time, action, count, tag, after)
+	local tag = tag or uid()
+	if self.timers[tag] then return false end
+	local total = _random_time(time)
+	self.timers[tag] = {
+		type      = 'every', 
+		status    = 'play',
+		total     = total, 
+		initial_time = time, 
+		t         = total,
+		count     = count or -1, 
+		c         = 0, 
+		action    = action, 
+		after     = after or function() end,
+	}
+	return self.timers[tag]
 end
 
 function Timer:every(time, action, count, tag, after)
@@ -116,15 +131,15 @@ function Timer:every(time, action, count, tag, after)
 	self.timers[tag] = {
 		type      = 'every', 
 		status    = 'play',
-		total     = _rand(time), 
-		any_total = time, 
+		total     = _random_time(time), 
+		initial_time = time, 
 		t         = 0, 
 		count     = count or -1, 
 		c         = 0, 
 		action    = action, 
 		after     = after or function() end,
 	}
-	return tag
+	return self.timers[tag]
 end
 
 function Timer:during(time, action, tag, after)
@@ -134,11 +149,11 @@ function Timer:during(time, action, tag, after)
 		type    = 'during', 
 		status  = 'play',
 		t       = 0,
-		total   = _rand(time), 
+		total   = _random_time(time), 
 		action  = action, 
 		after   = after or function() end,
 	}
-	return tag
+	return self.timers[tag]
 end
 
 function Timer:tween(time, subject, target, method, tag, after)
@@ -148,7 +163,7 @@ function Timer:tween(time, subject, target, method, tag, after)
 		type    = 'tween', 
 		status  = 'play',
 		t       = 0,
-		total   = _rand(time), 
+		total   = _random_time(time), 
 		subject = subject, 
 		target  = target, 
 		method  = method, 
@@ -156,7 +171,7 @@ function Timer:tween(time, subject, target, method, tag, after)
 		payload = _calc_tween(subject, target, {}),
 		after   = after or function() end, 
 	}
-	return tag
+	return self.timers[tag]
 end
 
 function Timer:once(action, tag) 
@@ -188,4 +203,3 @@ function Timer:destroy()
 end
 
 return setmetatable({}, {__call = Timer.new})
-
