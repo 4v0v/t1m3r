@@ -44,12 +44,40 @@ end
 
 function Timer:update(dt)
   for tag, v in pairs(self.timers) do
-		if v.status ~= 'play' then goto continue end
+		if not v.active then goto continue end
 		v.t = v.t + dt
 
 		if v.type == 'after' then 
 			if v.t >= v.total then 
 				v.action()
+				self:remove(tag)
+			end
+
+		elseif v.type == 'after_true' then
+			if v.cond() then 
+				v.action()
+				self:remove(tag) 
+			end
+
+		elseif v.type == 'every_true' then
+			if v.cond() and v.can_do_action  then 
+				v.can_do_action = false
+				v.action()
+				v.c = v.c + 1
+				if v.c == v.count then 
+					v.after()
+					self:remove(tag)
+				end
+			elseif not v.cond() and not v.can_do_action then
+				v.can_do_action = true
+			end
+
+		elseif v.type == 'during_true' then
+			if v.cond() then 
+				if v.can_do_action then v.can_do_action = false end
+				v.action()
+			elseif not v.cond() and not v.can_do_action then
+				v.after()
 				self:remove(tag)
 			end
 
@@ -99,7 +127,7 @@ function Timer:after(time, action, tag)
 	if self.timers[tag] then return false end
 	self.timers[tag] = {
 		type   = 'after', 
-		status = 'play',
+		active = true,
 		t      = 0, 
 		total  = _random_time(time), 
 		action = action,
@@ -113,7 +141,7 @@ function Timer:every_immediate(time, action, count, tag, after)
 	local total = _random_time(time)
 	self.timers[tag] = {
 		type      = 'every', 
-		status    = 'play',
+		active    = true,
 		total     = total, 
 		initial_time = time, 
 		t         = total,
@@ -130,7 +158,7 @@ function Timer:every(time, action, count, tag, after)
 	if self.timers[tag] then return false end
 	self.timers[tag] = {
 		type      = 'every', 
-		status    = 'play',
+		active    = true,
 		total     = _random_time(time), 
 		initial_time = time, 
 		t         = 0, 
@@ -147,7 +175,7 @@ function Timer:during(time, action, tag, after)
   if self.timers[tag] then return false end
 	self.timers[tag] = {
 		type    = 'during', 
-		status  = 'play',
+		active  = true,
 		t       = 0,
 		total   = _random_time(time), 
 		action  = action, 
@@ -161,7 +189,7 @@ function Timer:tween(time, subject, target, method, tag, after)
 	if self.timers[tag] then return false end
 	self.timers[tag] = { 
 		type    = 'tween', 
-		status  = 'play',
+		active  = true,
 		t       = 0,
 		total   = _random_time(time), 
 		subject = subject, 
@@ -174,8 +202,50 @@ function Timer:tween(time, subject, target, method, tag, after)
 	return self.timers[tag]
 end
 
-function Timer:once(action, tag) 
-	return self:every(math.huge, action, _, tag) 
+function Timer:after_true(cond, action, tag)
+	local tag = tag or uid()
+	if self.timers[tag] then return false end
+	self.timers[tag] = { 
+		type   = 'after_true',
+		t      = 0,
+		active = true,
+		cond   = cond,
+		action = action,
+	}
+end
+
+function Timer:every_true(cond, action, count, tag, after)
+	local tag = tag or uid()
+	if self.timers[tag] then return false end
+	self.timers[tag] = { 
+		type   = 'every_true',
+		t      = 0,
+		active = true,
+		count  = count or -1,
+		c      = 0,
+		can_do_action = true,
+		cond   = cond,
+		action = action,
+		after  = after or function() end
+	}
+end
+
+function Timer:during_true(cond, action, tag, after)
+	local tag = tag or uid()
+	if self.timers[tag] then return false end
+	self.timers[tag] = { 
+		type   = 'during_true',
+		t      = 0,
+		active = true,
+		can_do_action = true,
+		cond   = cond,
+		action = action,
+		after  = after
+	}
+end
+
+function Timer:once(action, tag)
+	return self:every_immediate(math.huge, action, _, tag) 
 end
 
 function Timer:always(action, tag)
@@ -187,15 +257,17 @@ function Timer:get(tag)
 end
 
 function Timer:pause(tag) 
-	self.timers[tag].status = 'pause' 
+	self.timers[tag].active = false
 end
 
 function Timer:play(tag) 
-	self.timers[tag].status = 'play' 
+	self.timers[tag].active = true 
 end
 
-function Timer:remove(tag) 
-	self.timers[tag] = nil 
+function Timer:remove(tag)
+	local result = not not self.timers[tag]
+	self.timers[tag] = nil
+	return result
 end
 
 function Timer:destroy() 
