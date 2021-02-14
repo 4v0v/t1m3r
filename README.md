@@ -1,7 +1,10 @@
 # t1m3r
 
 ## What is it ?
-**timer** is a Löve framework library that handle doing action under certain conditions.
+**trigger** is a Löve framework library that handle doing action under certain conditions.
+
+The name and a lot of the ideas behind it are take from https://github.com/a327ex/Anchor/blob/master/engine/game/trigger.lua
+
 I use it to deal with boolean farms when coding complex behaviors for my games.
 
 It's build around [chrono.lua](https://github.com/adnzzzzZ/chrono) and [hump.timer](https://github.com/vrld/hump/blob/master/timer.lua).
